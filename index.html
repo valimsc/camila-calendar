@@ -1,1129 +1,278 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>NeuroAdapt — Calendário</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --black:  #000000;
-      --white:  #FFFFFF;
-      --dark:   #1A1A1A;
-      --mid:    #2E2E2E;
-      --red:    #FF1A1A;
-      --muted:  #888888;
-      --soft:   #BBBBBB;
-      --green:  #22C55E;
-    }
-
-    html, body {
-      background: var(--black);
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .app {
-      max-width: 430px;
-      margin: 0 auto;
-      min-height: 100vh;
-      padding-bottom: 64px;
-    }
-
-    /* ── HEADER ─────────────────────────────── */
-    .header {
-      padding: 18px 20px 0;
-      position: sticky;
-      top: 0;
-      background: var(--black);
-      z-index: 100;
-    }
-
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-
-    .logo-area {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-wrap {
-      width: 34px;
-      height: 34px;
-      background: var(--white);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .logo-img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-    }
-
-    .brand-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 22px;
-      letter-spacing: 0.06em;
-      line-height: 1;
-    }
-
-    .brand-red { color: var(--red); }
-
-    .btn-exit-admin {
-      background: transparent;
-      border: 1px solid var(--red);
-      color: var(--red);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 6px 12px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .admin-mode-bar {
-      background: var(--red);
-      color: var(--white);
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-align: center;
-      padding: 4px 0;
-      margin-bottom: 10px;
-    }
-
-    .week-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0 14px;
-      border-bottom: 1px solid var(--mid);
-    }
-
-    .btn-week {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 8px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      transition: color 0.15s;
-      min-width: 80px;
-    }
-
-    .btn-week:first-child { text-align: left; }
-    .btn-week:last-child  { text-align: right; }
-    .btn-week:hover, .btn-week:active { color: var(--white); }
-
-    .week-label { text-align: center; }
-
-    .week-number {
-      display: block;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      color: var(--red);
-    }
-
-    .week-range {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--white);
-    }
-
-    /* ── DAY CARDS ───────────────────────────── */
-    .days-list {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .day-card {
-      background: var(--dark);
-      border: 1px solid var(--mid);
-      padding: 16px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: border-color 0.15s;
-      user-select: none;
-    }
-
-    .day-card:hover  { border-color: #555; }
-    .day-card.today  { border-color: var(--red); }
-    .day-card.today .day-name { color: var(--white); }
-
-    .day-left { display: flex; flex-direction: column; gap: 2px; }
-
-    .day-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 22px;
-      letter-spacing: 0.04em;
-      line-height: 1;
-    }
-
-    .day-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .day-date {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .today-tag {
-      background: var(--red);
-      color: var(--white);
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      padding: 1px 6px;
-    }
-
-    .day-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--mid);
-      border: 1px solid #444;
-      flex-shrink: 0;
-    }
-
-    .status-dot.filled { background: var(--green); border-color: var(--green); }
-
-    .day-arrow { color: var(--muted); font-size: 18px; }
-
-    .btn-edit-day {
-      background: transparent;
-      border: 1px solid var(--mid);
-      color: var(--muted);
-      padding: 7px 12px;
-      cursor: pointer;
-      font-size: 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      transition: all 0.15s;
-    }
-
-    .btn-edit-day:hover { border-color: var(--red); color: var(--red); }
-
-    /* ── VIEWS ────────────────────────────────── */
-    .view { display: none; }
-    .view.active { display: block; }
-
-    /* ── DETAIL HEADER ──────────────────────── */
-    .detail-header {
-      padding: 20px 20px 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-
-    .btn-back {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 22px;
-      line-height: 1;
-      padding: 0;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    .btn-back:hover { color: var(--white); }
-
-    .detail-day-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      letter-spacing: 0.04em;
-      line-height: 1;
-    }
-
-    .detail-day-date {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-      margin-top: 3px;
-    }
-
-    /* ── CONTENT DETAIL (read) ──────────────── */
-    .content-sections { padding: 0 20px; }
-
-    .section-label {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      color: var(--red);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--mid);
-    }
-
-    .content-block {
-      background: var(--dark);
-      border: 1px solid var(--mid);
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    .field-row { margin-bottom: 16px; }
-    .field-row:last-child { margin-bottom: 0; }
-
-    .field-label {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .field-value {
-      font-size: 14px;
-      color: var(--white);
-      line-height: 1.6;
-    }
-
-    .field-value.title {
-      font-size: 17px;
-      font-weight: 600;
-    }
-
-    .pilar-badge {
-      display: inline-block;
-      border: 1px solid var(--mid);
-      color: var(--soft);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .gancho-text {
-      font-size: 15px;
-      font-style: italic;
-      color: var(--white);
-      border-left: 3px solid var(--red);
-      padding-left: 14px;
-      line-height: 1.55;
-    }
-
-    .story-sequence { display: flex; flex-direction: column; gap: 10px; }
-
-    .story-card {
-      background: #111;
-      border: 1px solid var(--mid);
-      padding: 14px;
-    }
-
-    .story-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .story-step {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-    }
-
-    .story-type-tag {
-      background: var(--red);
-      color: var(--white);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .story-text {
-      font-size: 13px;
-      color: var(--soft);
-      line-height: 1.55;
-    }
-
-    .stories-tema {
-      margin-bottom: 14px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 24px;
-    }
-
-    .empty-icon {
-      font-size: 36px;
-      color: var(--mid);
-      margin-bottom: 14px;
-    }
-
-    .empty-text {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── EDIT FORM ────────────────────────────── */
-    .edit-form { padding: 0 20px; }
-
-    .form-block {
-      background: var(--dark);
-      border: 1px solid var(--mid);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .form-block-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      color: var(--red);
-      margin-bottom: 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--mid);
-    }
-
-    .form-group { margin-bottom: 16px; }
-    .form-group:last-child { margin-bottom: 0; }
-
-    .form-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .form-input,
-    .form-textarea,
-    .form-select {
-      width: 100%;
-      background: var(--mid);
-      border: 1px solid #3A3A3A;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      padding: 11px 13px;
-      outline: none;
-      transition: border-color 0.15s;
-      -webkit-appearance: none;
-      border-radius: 0;
-    }
-
-    .form-input:focus,
-    .form-textarea:focus,
-    .form-select:focus { border-color: var(--red); }
-
-    .form-input::placeholder,
-    .form-textarea::placeholder { color: #555; }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 88px;
-      line-height: 1.55;
-    }
-
-    .form-select { cursor: pointer; }
-    .form-select option { background: #2E2E2E; }
-
-    .form-divider { height: 1px; background: var(--mid); margin: 16px 0; }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 40px;
-    }
-
-    .btn-primary {
-      flex: 1;
-      background: var(--red);
-      color: var(--white);
-      border: none;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 20px;
-      letter-spacing: 0.08em;
-      padding: 15px;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-
-    .btn-primary:active { opacity: 0.85; }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--mid);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 15px 18px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      transition: all 0.15s;
-    }
-
-    .btn-ghost:hover { border-color: #555; color: var(--white); }
-
-    /* ── MODAL ────────────────────────────────── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.88);
-      z-index: 200;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--dark);
-      border-top: 2px solid var(--red);
-      width: 100%;
-      max-width: 430px;
-      padding: 28px 24px 44px;
-      transform: translateY(24px);
-      transition: transform 0.2s;
-    }
-
-    .modal-overlay.open .modal { transform: translateY(0); }
-
-    .modal-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 26px;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
-    }
-
-    .modal-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 22px;
-    }
-
-    .modal-error {
-      color: var(--red);
-      font-size: 12px;
-      font-weight: 500;
-      margin-top: 7px;
-      display: none;
-    }
-
-    .modal-error.show { display: block; }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .btn-cancel {
-      background: transparent;
-      border: 1px solid var(--mid);
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      padding: 13px 18px;
-      cursor: pointer;
-    }
-
-    /* ── FOOTER ───────────────────────────────── */
-    .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      padding: 10px;
-      background: var(--black);
-      border-top: 1px solid #111;
-      z-index: 50;
-    }
-
-    .btn-admin-trigger {
-      background: transparent;
-      border: none;
-      color: #2A2A2A;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 6px 14px;
-      transition: color 0.15s;
-    }
-
-    .btn-admin-trigger:hover { color: var(--muted); }
-
-    /* ── TOAST ────────────────────────────────── */
-    .toast {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-80px);
-      background: var(--dark);
-      border: 1px solid var(--green);
-      color: var(--green);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 10px 20px;
-      z-index: 400;
-      transition: transform 0.28s cubic-bezier(.34,1.56,.64,1);
-      white-space: nowrap;
-      letter-spacing: 0.04em;
-    }
-
-    .toast.show { transform: translateX(-50%) translateY(0); }
-    .toast.err  { border-color: var(--red); color: var(--red); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Calendário de Conteúdo — Dra. Camila Pancoti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;font-family:'DM Sans',sans-serif;max-width:430px;margin:0 auto;min-height:100dvh;overflow-x:hidden}
+
+.header{padding:18px 20px 14px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;justify-content:center;min-height:62px}
+.header img{height:34px;width:auto;display:block}
+.logo-txt{font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:.12em;color:#fff}
+
+.week-nav{display:flex;align-items:center;padding:14px 16px 10px;gap:8px}
+.nav-btn{background:#1A1A1A;border:none;color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:background .15s}
+.nav-btn:hover{background:#FF1A1A}
+.nav-btn:active{background:#c90000}
+.week-info{flex:1;text-align:center}
+.week-num{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:.1em;line-height:1}
+.week-range{font-size:12px;color:#666;margin-top:3px}
+
+.cards{padding:8px 16px 40px;display:flex;flex-direction:column;gap:10px}
+.day-card{background:#1A1A1A;border-radius:14px;padding:16px 16px 14px;border:1.5px solid transparent;cursor:pointer;position:relative;transition:border-color .15s,background .1s;user-select:none}
+.day-card:active{background:#222}
+.day-card.is-today{border-color:#FF1A1A}
+.day-card.is-empty{opacity:.55}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.card-left{display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.filled{background:#FF1A1A}
+.dot.empty{background:#3a3a3a}
+.day-name-lbl{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:.05em;line-height:1}
+.today-badge{background:#FF1A1A;color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em;padding:3px 8px;border-radius:4px;text-transform:uppercase}
+.card-date{font-size:12px;color:#555;padding-left:18px}
+.card-preview{margin-top:8px;padding-left:18px;font-size:13px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 36px)}
+.card-chev{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#FF1A1A;font-size:20px;line-height:1}
+
+.detail-view{position:fixed;inset:0;background:#000;z-index:50;overflow-y:auto;max-width:430px;left:50%;transform:translateX(-50%);width:100%}
+.detail-hdr{position:sticky;top:0;background:#000;border-bottom:1px solid #1e1e1e;padding:16px 20px;display:flex;align-items:center;gap:14px;z-index:10}
+.back-btn{background:#1A1A1A;border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.back-btn:hover{background:#2E2E2E}
+.d-day{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:.05em}
+.d-date{font-size:12px;color:#555;margin-top:1px}
+
+.detail-body{padding:20px 16px 56px}
+.blk{margin-bottom:28px}
+.blk-title{font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:.22em;color:#FF1A1A;border-bottom:1px solid #111;padding-bottom:8px;margin-bottom:16px}
+.fld{margin-bottom:16px}
+.fld-key{font-size:10px;font-weight:700;letter-spacing:.12em;color:#444;text-transform:uppercase;margin-bottom:5px}
+.fld-val{font-size:14px;line-height:1.55;color:#ddd}
+.fld-val.red{color:#FF1A1A;font-weight:500;font-style:italic}
+
+.pilar-badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.pb-a{background:#fff;color:#000}
+.pb-r{background:#FF1A1A;color:#fff}
+.pb-c{background:#2E2E2E;color:#fff;border:1px solid #444}
+
+.stories-seq{display:flex;flex-direction:column;gap:10px}
+.story-card{background:#0f0f0f;border-radius:10px;padding:12px 14px;border-left:3px solid #222}
+.story-card.s3{border-left-color:#FF1A1A}
+.story-num{font-size:10px;font-weight:700;letter-spacing:.12em;color:#444;text-transform:uppercase;margin-bottom:5px}
+.s3 .story-num{color:#FF1A1A}
+.story-txt{font-size:13px;line-height:1.55;color:#bbb}
+.interact-type{display:inline-block;background:#FF1A1A;color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+
+.load-wrap{padding:60px 24px;text-align:center;color:#444}
+.spinner{width:26px;height:26px;border:2px solid #1a1a1a;border-top-color:#FF1A1A;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-msg{margin:16px;padding:14px;background:#110000;border:1px solid #3a0000;border-radius:10px;font-size:13px;color:#ff5555;text-align:center;line-height:1.5}
+.empty-day{padding:52px 24px;text-align:center;color:#333}
+.empty-day h3{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:.1em;margin-bottom:8px;color:#2a2a2a}
+.empty-day p{font-size:13px;line-height:1.5}
+</style>
 </head>
 <body>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- ADMIN MODAL -->
-<div class="modal-overlay" id="adminModal">
-  <div class="modal">
-    <div class="modal-title">ACESSO ADMIN</div>
-    <div class="modal-sub">Digite a senha para entrar no modo de edição</div>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input type="password" class="form-input" id="adminPw" placeholder="••••••••" autocomplete="off">
-      <div class="modal-error" id="modalErr">Senha incorreta. Tente novamente.</div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" style="flex:1;font-size:18px" onclick="submitLogin()">Entrar</button>
-    </div>
-  </div>
-</div>
-
-<div class="app">
-
-  <!-- HEADER -->
-  <header class="header" id="appHeader">
-    <div class="header-top">
-      <div class="logo-area">
-        <div class="logo-wrap">
-          <img src="Design sem nome.png" alt="NeuroAdapt" class="logo-img"
-               onerror="this.parentElement.innerHTML='<span style=\'font-family:Bebas Neue,sans-serif;color:#FF1A1A;font-size:18px;line-height:1\'>N</span>'">
-        </div>
-        <span class="brand-name">NEURO<span class="brand-red">ADAPT</span></span>
-      </div>
-      <div id="headerAction"></div>
-    </div>
-    <div id="adminBar"></div>
-    <nav class="week-nav">
-      <button class="btn-week" onclick="changeWeek(-1)">← ANTERIOR</button>
-      <div class="week-label">
-        <span class="week-number" id="wkNum">SEMANA --</span>
-        <span class="week-range" id="wkRange">-- a --</span>
-      </div>
-      <button class="btn-week" onclick="changeWeek(1)">PRÓXIMA →</button>
-    </nav>
+<div id="mainView">
+  <header class="header">
+    <img src="logo.png" alt="NeuroAdapt" id="logoImg"
+         onerror="this.style.display='none';document.getElementById('logoTxt').style.display='block'">
+    <span class="logo-txt" id="logoTxt" style="display:none">NEUROADAPT</span>
   </header>
 
-  <!-- VIEW: MAIN -->
-  <div class="view active" id="vMain">
-    <div class="days-list" id="daysList"></div>
-  </div>
-
-  <!-- VIEW: DETAIL -->
-  <div class="view" id="vDetail">
-    <div class="detail-header">
-      <button class="btn-back" onclick="goMain()">←</button>
-      <div>
-        <div class="detail-day-name" id="dName"></div>
-        <div class="detail-day-date" id="dDate"></div>
-      </div>
+  <nav class="week-nav">
+    <button class="nav-btn" onclick="changeWeek(-1)" aria-label="Semana anterior">&#8592;</button>
+    <div class="week-info">
+      <div class="week-num" id="weekNum"></div>
+      <div class="week-range" id="weekRange"></div>
     </div>
-    <div class="content-sections" id="dContent"></div>
-  </div>
+    <button class="nav-btn" onclick="changeWeek(1)" aria-label="Próxima semana">&#8594;</button>
+  </nav>
 
-  <!-- VIEW: EDIT -->
-  <div class="view" id="vEdit">
-    <div class="detail-header">
-      <button class="btn-back" onclick="goMain()">←</button>
-      <div>
-        <div class="detail-day-name" id="eName"></div>
-        <div class="detail-day-date" id="eDate"></div>
-      </div>
+  <div id="cardsArea"></div>
+</div>
+
+<div id="detailView" class="detail-view" style="display:none">
+  <div class="detail-hdr">
+    <button class="back-btn" onclick="closeDetail()">&#8592;</button>
+    <div>
+      <div class="d-day" id="detailDay"></div>
+      <div class="d-date" id="detailDate"></div>
     </div>
-
-    <form class="edit-form" id="editForm" onsubmit="saveDay(event)">
-
-      <div class="form-block">
-        <div class="form-block-title">▶ REELS / VÍDEO</div>
-
-        <div class="form-group">
-          <label class="form-label">Tema</label>
-          <input type="text" class="form-input" id="f_tema"
-                 placeholder='Ex: "Quando o cansaço não é preguiça"'>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Pilar</label>
-          <select class="form-select" id="f_pilar">
-            <option value="">Selecione o pilar</option>
-            <option>Autoridade Clínica</option>
-            <option>Rotina Médica Real</option>
-            <option>Comportamento &amp; Saúde Mental</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Direcionamento</label>
-          <textarea class="form-textarea" id="f_dir"
-                    placeholder="Como falar, tom, estrutura do vídeo, o que mostrar, como gravar..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Gancho Sugerido</label>
-          <input type="text" class="form-input" id="f_gancho"
-                 placeholder='Ex: "Você não está com preguiça. Você está exausto de verdade."'>
-        </div>
-      </div>
-
-      <div class="form-block">
-        <div class="form-block-title">◼ STORIES</div>
-
-        <div class="form-group">
-          <label class="form-label">Tema do Story</label>
-          <input type="text" class="form-input" id="f_stema"
-                 placeholder="Ex: Bastidores de um dia de consultas">
-        </div>
-
-        <div class="form-divider"></div>
-
-        <div class="form-group">
-          <label class="form-label">Story 1 — Gancho</label>
-          <textarea class="form-textarea" style="min-height:72px" id="f_s1"
-                    placeholder='Ex: "Mostre sua xícara de café com a legenda: começa mais um dia de…"'></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Story 2 — Conteúdo</label>
-          <textarea class="form-textarea" style="min-height:72px" id="f_s2"
-                    placeholder="Ex: Mostre o consultório com uma frase sobre o que você aprende com cada paciente..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Story 3 — Tipo de Interação</label>
-          <select class="form-select" id="f_s3tipo">
-            <option value="">Selecione o tipo</option>
-            <option>Enquete</option>
-            <option>Caixinha de Perguntas</option>
-            <option>Reação com Emoji</option>
-            <option>Quiz</option>
-            <option>Contagem Regressiva</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Instrução da Interação</label>
-          <textarea class="form-textarea" style="min-height:72px" id="f_s3inst"
-                    placeholder="Ex: Enquete — Você já se sentiu assim? / Sim, toda semana / Só às vezes"></textarea>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="btn-ghost" onclick="clearDay()">Limpar</button>
-        <button type="submit" class="btn-primary">Salvar Dia</button>
-      </div>
-
-    </form>
   </div>
-
-</div><!-- .app -->
-
-<!-- FOOTER -->
-<footer class="footer" id="appFooter">
-  <button class="btn-admin-trigger" id="adminTrigger" onclick="openModal()">Admin</button>
-</footer>
+  <div class="detail-body" id="detailBody"></div>
+</div>
 
 <script>
-/* ═══════════════════════════════ STATE ══════════════════ */
-const S = {
-  offset: 0,
-  admin: false,
-  view: 'main',
-  day: 0,
-};
+const SUPA_URL = 'https://guarowyyhqlbtqdntuji.supabase.co';
+const SUPA_KEY = 'sb_publishable_DoQLD1mpR2oDOuh_5ToBQQ_ue3p3b8U';
 
-const DAYS   = ['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA'];
-const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const PASS   = 'neuro2025';
+const DAYS  = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira'];
+const DAYS_S = ['SEG','TER','QUA','QUI','SEX'];
+const MONTHS  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTHS_S = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-/* ═══════════════════════════════ WEEK UTILS ═════════════ */
-function monday(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
-  d.setHours(0, 0, 0, 0);
-  return d;
+let weekOffset = 0;
+let weekData   = Array(5).fill(null);
+let weekMonday = null;
+
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dow = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dow);
+  const y = t.getUTCFullYear();
+  const jan1 = new Date(Date.UTC(y, 0, 1));
+  return { year: y, week: Math.ceil(((t - jan1) / 86400000 + 1) / 7) };
 }
 
-function isoWeek(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dn = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dn);
-  const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - y) / 86400000) + 1) / 7);
+function getMonday(d) {
+  const r = new Date(d); r.setHours(0,0,0,0);
+  const dow = r.getDay();
+  r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1));
+  return r;
 }
 
-function weekDays() {
-  const mon = monday(new Date());
-  mon.setDate(mon.getDate() + S.offset * 7);
-  const days = Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    return d;
-  });
-  const wn   = isoWeek(mon);
-  const yr   = mon.getFullYear();
-  const fri  = days[4];
-  const range = mon.getMonth() === fri.getMonth()
-    ? `${mon.getDate()} a ${fri.getDate()} de ${MONTHS[mon.getMonth()]}`
-    : `${mon.getDate()} de ${MONTHS[mon.getMonth()]} a ${fri.getDate()} de ${MONTHS[fri.getMonth()]}`;
-  return { days, wn, yr, range };
+function weekKey(mon) {
+  const { year, week } = isoWeek(mon);
+  return `${year}_W${String(week).padStart(2,'0')}`;
 }
 
-function storageKey() {
-  const { wn, yr } = weekDays();
-  return `week_${yr}_${wn}`;
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate() + n); return r;
 }
 
-function loadWeek()       { const r = localStorage.getItem(storageKey()); return r ? JSON.parse(r) : {}; }
-function saveWeek(data)   { localStorage.setItem(storageKey(), JSON.stringify(data)); }
-function dayKey(i)        { return ['monday','tuesday','wednesday','thursday','friday'][i]; }
-
-function isToday(date) {
-  const n = new Date();
-  return date.getDate() === n.getDate() &&
-         date.getMonth() === n.getMonth() &&
-         date.getFullYear() === n.getFullYear();
+function isToday(d) {
+  const t = new Date();
+  return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
 }
 
-function hasFill(d) { return !!(d && (d.reels?.tema || d.stories?.tema)); }
+function fmtDate(d) { return `${d.getDate()} de ${MONTHS[d.getMonth()]}`; }
 
-/* ═══════════════════════════════ RENDER HEADER ══════════ */
-function renderHeader() {
-  const { wn, range } = weekDays();
-  document.getElementById('wkNum').textContent   = `SEMANA ${wn}`;
-  document.getElementById('wkRange').textContent = range;
-
-  const ha = document.getElementById('headerAction');
-  const ab = document.getElementById('adminBar');
-
-  if (S.admin) {
-    ha.innerHTML = `<button class="btn-exit-admin" onclick="exitAdmin()">Sair do Admin</button>`;
-    ab.innerHTML = `<div class="admin-mode-bar">MODO EDIÇÃO ATIVO</div>`;
-  } else {
-    ha.innerHTML = '';
-    ab.innerHTML = '';
-  }
-
-  document.getElementById('adminTrigger').style.display = S.admin ? 'none' : '';
+function updateLabel(mon) {
+  const fri = addDays(mon, 4);
+  const { week } = isoWeek(mon);
+  document.getElementById('weekNum').textContent = `Semana ${week}`;
+  document.getElementById('weekRange').textContent =
+    mon.getMonth() === fri.getMonth()
+      ? `${mon.getDate()} a ${fri.getDate()} de ${MONTHS[mon.getMonth()]}`
+      : `${mon.getDate()} ${MONTHS_S[mon.getMonth()]} – ${fri.getDate()} ${MONTHS_S[fri.getMonth()]}`;
 }
-
-/* ═══════════════════════════════ RENDER MAIN ════════════ */
-function renderMain() {
-  const data   = loadWeek();
-  const { days } = weekDays();
-
-  document.getElementById('daysList').innerHTML = days.map((date, i) => {
-    const d      = data[dayKey(i)];
-    const filled = hasFill(d);
-    const today  = isToday(date);
-    const ds     = `${date.getDate()} de ${MONTHS[date.getMonth()]}`;
-    const todayTag = today ? `<span class="today-tag">HOJE</span>` : '';
-
-    const right = S.admin
-      ? `<div class="day-right">
-           <div class="status-dot${filled ? ' filled' : ''}"></div>
-           <button class="btn-edit-day" onclick="openEdit(${i})">Editar</button>
-         </div>`
-      : `<div class="day-right">
-           <div class="status-dot${filled ? ' filled' : ''}"></div>
-           <span class="day-arrow">›</span>
-         </div>`;
-
-    const clickAttr = S.admin ? '' : `onclick="openDetail(${i})"`;
-
-    return `
-      <div class="day-card${today ? ' today' : ''}" ${clickAttr}>
-        <div class="day-left">
-          <div class="day-name">${DAYS[i]}</div>
-          <div class="day-meta">
-            <span class="day-date">${ds}</span>${todayTag}
-          </div>
-        </div>
-        ${right}
-      </div>`;
-  }).join('');
-}
-
-/* ═══════════════════════════════ RENDER DETAIL ══════════ */
-function renderDetail(i) {
-  const data = loadWeek();
-  const { days } = weekDays();
-  const d    = data[dayKey(i)] || {};
-  const date = days[i];
-
-  document.getElementById('dName').textContent = DAYS[i];
-  document.getElementById('dDate').textContent = `${date.getDate()} de ${MONTHS[date.getMonth()]}`;
-
-  const r = d.reels   || {};
-  const s = d.stories || {};
-  const hasR = r.tema || r.pilar || r.direcionamento || r.gancho;
-  const hasS = s.tema || s.story1 || s.story2 || s.story3Inst;
-
-  if (!hasR && !hasS) {
-    document.getElementById('dContent').innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">◻</div>
-        <div class="empty-text">Nenhum conteúdo adicionado<br>para este dia ainda.</div>
-      </div>`;
-    return;
-  }
-
-  let html = '';
-
-  if (hasR) {
-    html += `<div class="section-label">REELS / VÍDEO</div><div class="content-block">`;
-    if (r.tema)         html += field('Tema',             `<div class="field-value title">${esc(r.tema)}</div>`);
-    if (r.pilar)        html += field('Pilar',            `<span class="pilar-badge">${esc(r.pilar)}</span>`);
-    if (r.direcionamento) html += field('Direcionamento', `<div class="field-value">${esc(r.direcionamento)}</div>`);
-    if (r.gancho)       html += field('Gancho Sugerido',  `<div class="gancho-text">${esc(r.gancho)}</div>`);
-    html += `</div>`;
-  }
-
-  if (hasS) {
-    html += `<div class="section-label">STORIES</div>`;
-    if (s.tema) {
-      html += `<div class="stories-tema">${field('Tema do Story', `<div class="field-value title">${esc(s.tema)}</div>`)}</div>`;
-    }
-    html += `<div class="story-sequence">`;
-    if (s.story1) html += storyCard('STORY 1 — GANCHO',   '', s.story1);
-    if (s.story2) html += storyCard('STORY 2 — CONTEÚDO', '', s.story2);
-    if (s.story3Inst || s.story3Tipo)
-      html += storyCard('STORY 3 — INTERAÇÃO', s.story3Tipo || '', s.story3Inst || '');
-    html += `</div>`;
-  }
-
-  document.getElementById('dContent').innerHTML = html;
-}
-
-function field(label, valueHtml) {
-  return `<div class="field-row"><div class="field-label">${label}</div>${valueHtml}</div>`;
-}
-
-function storyCard(step, tipo, text) {
-  const badge = tipo ? `<span class="story-type-tag">${esc(tipo)}</span>` : '';
-  return `<div class="story-card">
-    <div class="story-card-top">
-      <span class="story-step">${step}</span>${badge}
-    </div>
-    ${text ? `<div class="story-text">${esc(text)}</div>` : ''}
-  </div>`;
-}
-
-/* ═══════════════════════════════ EDIT FORM ══════════════ */
-function loadForm(i) {
-  const data = loadWeek();
-  const { days } = weekDays();
-  const d    = data[dayKey(i)] || {};
-  const r    = d.reels   || {};
-  const s    = d.stories || {};
-  const date = days[i];
-
-  document.getElementById('eName').textContent = DAYS[i];
-  document.getElementById('eDate').textContent = `${date.getDate()} de ${MONTHS[date.getMonth()]}`;
-
-  $('f_tema').value    = r.tema          || '';
-  $('f_pilar').value   = r.pilar         || '';
-  $('f_dir').value     = r.direcionamento || '';
-  $('f_gancho').value  = r.gancho        || '';
-  $('f_stema').value   = s.tema          || '';
-  $('f_s1').value      = s.story1        || '';
-  $('f_s2').value      = s.story2        || '';
-  $('f_s3tipo').value  = s.story3Tipo    || '';
-  $('f_s3inst').value  = s.story3Inst    || '';
-}
-
-function saveDay(e) {
-  e.preventDefault();
-  const data = loadWeek();
-  data[dayKey(S.day)] = {
-    reels: {
-      tema:           $('f_tema').value.trim(),
-      pilar:          $('f_pilar').value,
-      direcionamento: $('f_dir').value.trim(),
-      gancho:         $('f_gancho').value.trim(),
-    },
-    stories: {
-      tema:       $('f_stema').value.trim(),
-      story1:     $('f_s1').value.trim(),
-      story2:     $('f_s2').value.trim(),
-      story3Tipo: $('f_s3tipo').value,
-      story3Inst: $('f_s3inst').value.trim(),
-    }
-  };
-  saveWeek(data);
-  toast('Salvo com sucesso');
-  goMain();
-}
-
-function clearDay() {
-  if (!confirm('Limpar todo o conteúdo deste dia?')) return;
-  const data = loadWeek();
-  delete data[dayKey(S.day)];
-  saveWeek(data);
-  toast('Dia limpo');
-  goMain();
-}
-
-/* ═══════════════════════════════ NAVIGATION ════════════ */
-function setView(v) {
-  S.view = v;
-  ['vMain','vDetail','vEdit'].forEach(id => {
-    document.getElementById(id).classList.toggle('active', id === `v${cap(v)}`);
-  });
-  document.getElementById('appFooter').style.display = (v === 'main') ? '' : 'none';
-  if (v === 'main') renderMain();
-  window.scrollTo(0, 0);
-}
-
-function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-function goMain()         { setView('main'); }
-function openDetail(i)    { S.day = i; renderDetail(i); setView('detail'); }
-function openEdit(i)      { S.day = i; loadForm(i); setView('edit'); }
-function changeWeek(dir)  { S.offset += dir; renderHeader(); if (S.view === 'main') renderMain(); }
-
-/* ═══════════════════════════════ ADMIN ═════════════════ */
-function openModal()  {
-  $('adminPw').value = '';
-  $('modalErr').classList.remove('show');
-  $('adminModal').classList.add('open');
-  setTimeout(() => $('adminPw').focus(), 280);
-}
-
-function closeModal() { $('adminModal').classList.remove('open'); }
-
-function submitLogin() {
-  if ($('adminPw').value === PASS) {
-    S.admin = true;
-    closeModal();
-    renderHeader();
-    renderMain();
-  } else {
-    $('modalErr').classList.add('show');
-    $('adminPw').value = '';
-    $('adminPw').focus();
-  }
-}
-
-function exitAdmin() {
-  S.admin = false;
-  renderHeader();
-  renderMain();
-}
-
-$('adminPw').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
-$('adminModal').addEventListener('click', e => { if (e.target === $('adminModal')) closeModal(); });
-
-/* ═══════════════════════════════ TOAST ═════════════════ */
-let _toastTimer;
-function toast(msg, err = false) {
-  const el = $('toast');
-  el.textContent = msg;
-  el.classList.toggle('err', err);
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-/* ═══════════════════════════════ UTILS ═════════════════ */
-function $(id) { return document.getElementById(id); }
 
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/\n/g,'<br>');
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ═══════════════════════════════ INIT ══════════════════ */
-renderHeader();
-renderMain();
+function pilarCls(p) {
+  if (!p) return 'pb-a';
+  const l = p.toLowerCase();
+  if (l.includes('autoridade')) return 'pb-a';
+  if (l.includes('rotina'))     return 'pb-r';
+  return 'pb-c';
+}
+
+async function loadWeek() {
+  const ref = new Date(); ref.setDate(ref.getDate() + weekOffset * 7);
+  weekMonday = getMonday(ref);
+  updateLabel(weekMonday);
+
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = '<div class="load-wrap"><div class="spinner"></div><div>Carregando...</div></div>';
+
+  try {
+    const key = weekKey(weekMonday);
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/calendar_content?week_key=eq.${key}&order=day_index`,
+      { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } }
+    );
+    if (!res.ok) throw new Error(res.status);
+    const rows = await res.json();
+    weekData = Array(5).fill(null);
+    rows.forEach(r => { if (r.day_index >= 0 && r.day_index <= 4) weekData[r.day_index] = r; });
+    renderCards();
+  } catch {
+    area.innerHTML = '<div class="err-msg">Erro ao carregar dados. Verifique a conexão.</div>';
+  }
+}
+
+function renderCards() {
+  const html = weekData.map((row, i) => {
+    const d = addDays(weekMonday, i);
+    const tod = isToday(d);
+    const has = !!row;
+    return `
+      <div class="day-card${tod?' is-today':''}${!has?' is-empty':''}" onclick="openDetail(${i})">
+        <div class="card-top">
+          <div class="card-left">
+            <span class="dot ${has?'filled':'empty'}"></span>
+            <span class="day-name-lbl">${DAYS_S[i]}</span>
+          </div>
+          ${tod ? '<span class="today-badge">HOJE</span>' : ''}
+        </div>
+        <div class="card-date">${fmtDate(d)}</div>
+        ${has && row.reels_tema ? `<div class="card-preview">${esc(row.reels_tema)}</div>` : ''}
+        ${has ? '<div class="card-chev">&#8250;</div>' : ''}
+      </div>`;
+  }).join('');
+  document.getElementById('cardsArea').innerHTML = `<div class="cards">${html}</div>`;
+}
+
+function openDetail(i) {
+  const d = addDays(weekMonday, i);
+  document.getElementById('detailDay').textContent  = DAYS[i];
+  document.getElementById('detailDate').textContent = fmtDate(d);
+
+  const body = document.getElementById('detailBody');
+  const row  = weekData[i];
+
+  if (!row) {
+    body.innerHTML = `<div class="empty-day"><h3>SEM CONTEÚDO</h3><p>Conteúdo sendo preparado pela NeuroAdapt</p></div>`;
+  } else {
+    body.innerHTML = `
+      <div class="blk">
+        <div class="blk-title">&#9658; REELS</div>
+        ${row.reels_tema ? `<div class="fld"><div class="fld-key">Tema</div><div class="fld-val">${esc(row.reels_tema)}</div></div>` : ''}
+        ${row.reels_pilar ? `<div class="fld"><div class="fld-key">Pilar</div><div class="fld-val"><span class="pilar-badge ${pilarCls(row.reels_pilar)}">${esc(row.reels_pilar)}</span></div></div>` : ''}
+        ${row.reels_direcionamento ? `<div class="fld"><div class="fld-key">Direcionamento</div><div class="fld-val">${esc(row.reels_direcionamento)}</div></div>` : ''}
+        ${row.reels_gancho ? `<div class="fld"><div class="fld-key">Gancho</div><div class="fld-val red">"${esc(row.reels_gancho)}"</div></div>` : ''}
+      </div>
+      <div class="blk">
+        <div class="blk-title">&#9658; STORIES</div>
+        ${row.story_tema ? `<div class="fld"><div class="fld-key">Tema</div><div class="fld-val">${esc(row.story_tema)}</div></div>` : ''}
+        <div class="stories-seq">
+          ${row.story_1 ? `<div class="story-card"><div class="story-num">Story 1 &mdash; Gancho</div><div class="story-txt">${esc(row.story_1)}</div></div>` : ''}
+          ${row.story_2 ? `<div class="story-card"><div class="story-num">Story 2 &mdash; Conteúdo</div><div class="story-txt">${esc(row.story_2)}</div></div>` : ''}
+          ${row.story_3_tipo ? `
+          <div class="story-card s3">
+            <div class="story-num">Story 3 &mdash; Interação</div>
+            <div class="interact-type">${esc(row.story_3_tipo)}</div>
+            ${row.story_3_instrucao ? `<div class="story-txt">${esc(row.story_3_instrucao)}</div>` : ''}
+          </div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('detailView').style.display = 'block';
+  document.getElementById('detailView').scrollTop = 0;
+}
+
+function closeDetail() {
+  document.getElementById('detailView').style.display = 'none';
+  document.getElementById('mainView').style.display = '';
+}
+
+function changeWeek(dir) { weekOffset += dir; loadWeek(); }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+loadWeek();
 </script>
 </body>
 </html>
