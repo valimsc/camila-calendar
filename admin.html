@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Admin — NeuroAdapt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;font-family:'DM Sans',sans-serif;max-width:430px;margin:0 auto;min-height:100dvh;overflow-x:hidden}
+
+/* ── LOGIN ── */
+#loginView{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;z-index:999}
+.login-logo{margin-bottom:36px;text-align:center}
+.login-logo img{height:40px;width:auto}
+.login-logo .lg-txt{font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:.12em}
+.login-title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:.1em;margin-bottom:4px;text-align:center}
+.login-sub{font-size:13px;color:#555;margin-bottom:32px;text-align:center}
+.login-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+.login-input{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:18px;padding:16px;text-align:center;letter-spacing:.3em;width:100%;transition:border-color .15s}
+.login-input:focus{outline:none;border-color:#FF1A1A}
+.login-input::placeholder{letter-spacing:.08em;font-size:14px;color:#333}
+.login-btn{background:#FF1A1A;border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;padding:16px;cursor:pointer;width:100%;transition:background .15s}
+.login-btn:hover{background:#e00}
+.login-err{font-size:12px;color:#ff5555;text-align:center;min-height:16px}
+
+/* ── APP ── */
+#app{display:none}
+
+/* HEADER */
+.header{padding:16px 20px 12px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;position:sticky;top:0;background:#000;z-index:40}
+.header img{height:30px;width:auto;display:block}
+.logo-txt{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:.12em;color:#fff}
+.admin-badge{background:#FF1A1A;color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em;padding:3px 8px;border-radius:4px;text-transform:uppercase;flex-shrink:0}
+
+/* API KEY BAR */
+.api-bar{padding:10px 16px;background:#080808;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:10px}
+.api-bar label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#555;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.api-bar input{flex:1;background:#111;border:1px solid #222;border-radius:8px;color:#888;font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;min-width:0;transition:border-color .15s,color .15s}
+.api-bar input:focus{outline:none;border-color:#333;color:#ddd}
+.api-save-btn{background:#1A1A1A;border:1px solid #2a2a2a;color:#888;font-size:11px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s,color .15s}
+.api-save-btn:hover{background:#222;color:#fff}
+
+/* WEEK NAV */
+.week-nav{display:flex;align-items:center;padding:14px 16px 10px;gap:8px}
+.nav-btn{background:#1A1A1A;border:none;color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:background .15s}
+.nav-btn:hover{background:#FF1A1A}
+.week-info{flex:1;text-align:center}
+.week-num{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:.1em;line-height:1}
+.week-range{font-size:12px;color:#666;margin-top:3px}
+
+/* ADMIN CARDS */
+.cards{padding:8px 16px 40px;display:flex;flex-direction:column;gap:10px}
+.day-card{background:#1A1A1A;border-radius:14px;padding:16px;border:1.5px solid transparent;transition:border-color .15s}
+.day-card.is-today{border-color:#FF1A1A}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.card-left{display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.filled{background:#FF1A1A}
+.dot.empty{background:#3a3a3a}
+.day-name-lbl{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:.05em;line-height:1}
+.today-badge{background:#FF1A1A;color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em;padding:3px 8px;border-radius:4px;text-transform:uppercase}
+.card-date{font-size:12px;color:#555;padding-left:18px}
+.card-preview{margin-top:6px;padding-left:18px;font-size:13px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 18px)}
+.card-btns{display:flex;gap:8px;margin-top:12px}
+.btn-edit{flex:1;background:#111;border:1px solid #2a2a2a;color:#ddd;border-radius:10px;padding:10px 8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
+.btn-edit:hover{background:#1a1a1a;border-color:#444}
+.btn-ai{flex:1;background:#FF1A1A;border:none;color:#fff;border-radius:10px;padding:10px 8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-ai:hover{background:#e00}
+
+/* EDIT VIEW */
+#editView{display:none}
+.edit-hdr{position:sticky;top:0;background:#000;border-bottom:1px solid #1e1e1e;padding:14px 20px;display:flex;align-items:center;gap:14px;z-index:10}
+.back-btn{background:#1A1A1A;border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.back-btn:hover{background:#2E2E2E}
+.edit-hdr-info .e-day{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:.05em}
+.edit-hdr-info .e-date{font-size:12px;color:#555;margin-top:1px}
+
+.edit-body{padding:20px 16px 56px}
+.sec-title{font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:.22em;color:#FF1A1A;border-bottom:1px solid #111;padding-bottom:8px;margin-bottom:16px;margin-top:24px}
+.sec-title:first-child{margin-top:0}
+.form-field{margin-bottom:16px}
+.form-label{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#555;text-transform:uppercase;margin-bottom:6px}
+.form-input,.form-textarea,.form-select{width:100%;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 14px;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.form-input:focus,.form-textarea:focus,.form-select:focus{outline:none;border-color:#FF1A1A}
+.form-input::placeholder,.form-textarea::placeholder{color:#333}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.55}
+.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+.form-select option{background:#111}
+
+.btn-row{display:flex;gap:10px;margin-top:28px}
+.btn-save{flex:2;background:#FF1A1A;border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:15px;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:#e00}
+.btn-save:disabled{background:#550000;cursor:not-allowed}
+.btn-clear{flex:1;background:#111;border:1px solid #2a2a2a;border-radius:12px;color:#666;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;padding:15px;cursor:pointer;transition:background .15s,color .15s}
+.btn-clear:hover{background:#1a1a1a;color:#aaa}
+
+/* AI MODAL */
+#aiModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;align-items:flex-end;justify-content:center}
+#aiModal.open{display:flex}
+.ai-sheet{background:#111;border-radius:20px 20px 0 0;padding:24px 20px 44px;width:100%;max-width:430px;max-height:85dvh;overflow-y:auto;position:relative}
+.ai-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:.08em;margin-bottom:3px}
+.ai-day-lbl{font-size:12px;color:#555;margin-bottom:20px}
+.ai-close{position:absolute;top:18px;right:18px;background:#1A1A1A;border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.ai-close:hover{background:#2E2E2E}
+.ai-ctx-label{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#555;text-transform:uppercase;margin-bottom:6px}
+.ai-ctx-input{width:100%;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 14px;resize:vertical;min-height:100px;line-height:1.55;transition:border-color .15s}
+.ai-ctx-input:focus{outline:none;border-color:#FF1A1A}
+.ai-ctx-input::placeholder{color:#333}
+.ai-gen-btn{width:100%;background:#FF1A1A;border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:15px;cursor:pointer;margin-top:14px;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.ai-gen-btn:hover{background:#e00}
+.ai-gen-btn:disabled{background:#550000;cursor:not-allowed}
+.btn-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A1A1A;border:1px solid #333;border-radius:40px;padding:11px 22px;font-size:14px;font-weight:500;color:#fff;z-index:500;transition:transform .3s ease,opacity .3s;white-space:nowrap;pointer-events:none;opacity:0;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* STATES */
+.load-wrap{padding:60px 24px;text-align:center;color:#444}
+.spinner{width:26px;height:26px;border:2px solid #1a1a1a;border-top-color:#FF1A1A;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+.err-msg{margin:16px;padding:14px;background:#110000;border:1px solid #3a0000;border-radius:10px;font-size:13px;color:#ff5555;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView">
+  <div class="login-logo">
+    <img src="logo.png" alt="NeuroAdapt" id="loginLogo"
+         onerror="this.style.display='none';document.getElementById('loginLogoTxt').style.display='block'">
+    <span class="lg-txt" id="loginLogoTxt" style="display:none">NEUROADAPT</span>
+  </div>
+  <div class="login-title">MODO ADMIN</div>
+  <div class="login-sub">Acesso restrito à equipe NeuroAdapt</div>
+  <div class="login-form">
+    <input class="login-input" type="password" id="pwdInput" placeholder="senha" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="header">
+    <img src="logo.png" alt="NeuroAdapt" id="appLogo"
+         onerror="this.style.display='none';document.getElementById('appLogoTxt').style.display='block'">
+    <span class="logo-txt" id="appLogoTxt" style="display:none">NEUROADAPT</span>
+    <span class="admin-badge">MODO ADMIN</span>
+  </header>
+
+  <!-- API KEY -->
+  <div class="api-bar">
+    <label for="apiKeyInput">API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-... (Anthropic API Key)" autocomplete="off"
+           oninput="localStorage.setItem('na_anthropic_key', this.value)">
+    <button class="api-save-btn" onclick="saveApiKey()">Salvar</button>
+  </div>
+
+  <!-- MAIN (CARDS) -->
+  <div id="mainView">
+    <nav class="week-nav">
+      <button class="nav-btn" onclick="changeWeek(-1)" aria-label="Semana anterior">&#8592;</button>
+      <div class="week-info">
+        <div class="week-num" id="weekNum"></div>
+        <div class="week-range" id="weekRange"></div>
+      </div>
+      <button class="nav-btn" onclick="changeWeek(1)" aria-label="Próxima semana">&#8594;</button>
+    </nav>
+    <div id="cardsArea"></div>
+  </div>
+
+  <!-- EDIT VIEW -->
+  <div id="editView">
+    <div class="edit-hdr">
+      <button class="back-btn" onclick="closeEdit()">&#8592;</button>
+      <div class="edit-hdr-info">
+        <div class="e-day" id="editDay"></div>
+        <div class="e-date" id="editDate"></div>
+      </div>
+    </div>
+    <div class="edit-body">
+      <div class="sec-title">▸ REELS</div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_reels_tema">Tema</label>
+        <input class="form-input" id="f_reels_tema" type="text"
+               placeholder="Ex: Quando o cansaço não é preguiça">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_reels_pilar">Pilar</label>
+        <select class="form-select" id="f_reels_pilar">
+          <option value="">Selecione...</option>
+          <option value="Autoridade Clínica">Autoridade Clínica</option>
+          <option value="Rotina Médica Real">Rotina Médica Real</option>
+          <option value="Comportamento &amp; Saúde Mental">Comportamento &amp; Saúde Mental</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_reels_dir">Direcionamento</label>
+        <textarea class="form-textarea" id="f_reels_dir" rows="4"
+                  placeholder="Descreva como falar, tom, estrutura do vídeo, o que mostrar..."></textarea>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_reels_gancho">Gancho sugerido</label>
+        <input class="form-input" id="f_reels_gancho" type="text"
+               placeholder="Ex: Você já acordou descansado e mesmo assim sem energia pra nada?">
+      </div>
+
+      <div class="sec-title">▸ STORIES</div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_story_tema">Tema do story</label>
+        <input class="form-input" id="f_story_tema" type="text"
+               placeholder="Ex: Bastidores de um dia de regulação médica">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_story1">Story 1 — Gancho</label>
+        <textarea class="form-textarea" id="f_story1" rows="3"
+                  placeholder="Ex: Mostre sua xícara de café com a legenda: mais um dia de..."></textarea>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_story2">Story 2 — Conteúdo</label>
+        <textarea class="form-textarea" id="f_story2" rows="3"
+                  placeholder="Ex: Filme a sua mesa de trabalho e explique em 15 segundos o que é regulação médica"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_story3_tipo">Story 3 — Tipo de interação</label>
+        <select class="form-select" id="f_story3_tipo">
+          <option value="">Selecione...</option>
+          <option value="Enquete">Enquete</option>
+          <option value="Caixinha de Perguntas">Caixinha de Perguntas</option>
+          <option value="Reação com Emoji">Reação com Emoji</option>
+          <option value="Quiz">Quiz</option>
+          <option value="Contagem Regressiva">Contagem Regressiva</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="f_story3_inst">Instrução da interação</label>
+        <textarea class="form-textarea" id="f_story3_inst" rows="3"
+                  placeholder="Ex: Pergunta para a enquete: Você sabia que médicos também precisam de saúde mental?"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-save" id="saveBtn" onclick="saveDay()">Salvar dia</button>
+        <button class="btn-clear" onclick="clearDay()">Limpar dia</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI MODAL -->
+<div id="aiModal">
+  <div class="ai-sheet">
+    <button class="ai-close" onclick="closeAiModal()">&#x2715;</button>
+    <div class="ai-title">Gerar com IA</div>
+    <div class="ai-day-lbl" id="aiDayLbl"></div>
+    <label class="ai-ctx-label" for="aiCtx">Contexto da semana</label>
+    <textarea class="ai-ctx-input" id="aiCtx" rows="5"
+              placeholder="Ex: Semana que a Dra. Camila começa a atender psiquiatria na You Institute às terças até 21h. Semana agitada, muita expectativa."></textarea>
+    <button class="ai-gen-btn" id="aiGenBtn" onclick="generateAI()">
+      <span class="btn-spinner" id="aiSpinner"></span>
+      <span id="aiGenTxt">Gerar conteúdo</span>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://guarowyyhqlbtqdntuji.supabase.co';
+const SUPA_KEY = 'sb_publishable_DoQLD1mpR2oDOuh_5ToBQQ_ue3p3b8U';
+const PASSWORD = 'neuro2025';
+
+const DAYS   = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira'];
+const DAYS_S = ['SEG','TER','QUA','QUI','SEX'];
+const MONTHS   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTHS_S = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+const AI_PROMPT = `Você é estrategista de conteúdo da NeuroAdapt, agência de neuromarketing.
+
+Você vai criar o conteúdo de um dia do calendário editorial da Dra. Camila Pancoti, médica psiquiatra.
+
+SOBRE ELA:
+- Psiquiatra com supervisão do Dr. Franco na You Institute
+- Atende também em serviço público (regulação e perícias médicas) — NÃO mencionar órgão público
+- Consulta: R$ 450 em média
+- Pós-graduação termina em julho de 2027
+- 787 seguidores atualmente, meta: 50k seguidores qualificados
+- Público-alvo: HIGH TICKET — profissionais, executivos, pessoas que valorizam saúde mental de qualidade
+- Conteúdo que mais performa: quando ela aparece em vídeo
+- NÃO trabalha com: autismo, dancinhas/trends, linguagem de blogueira
+
+PILARES DE CONTEÚDO:
+1. Autoridade Clínica — psiquiatria desmistificada, quando procurar um psiquiatra, mitos do diagnóstico
+2. Rotina Médica Real — bastidores do dia a dia, humaniza sem banalizar
+3. Comportamento & Saúde Mental — temas que atraem high ticket: burnout, sono, ansiedade de performance, uso de telas
+
+REGRAS:
+- Tom: direto, humano, sem jargão excessivo, sem ser blogueira
+- Objetivo: posicionar como médica de autoridade para atrair pacientes high ticket
+- Não transformar em influencer, mas em referência médica
+- Sempre incluir gancho forte que prende nos primeiros 3 segundos
+- Stories devem gerar interação real do público
+
+CONTEXTO DA SEMANA: {contexto}
+DIA: {dia}
+
+Retorne APENAS um JSON válido, sem texto antes ou depois, sem markdown, sem backticks:
+{
+  "reels_tema": "",
+  "reels_pilar": "",
+  "reels_direcionamento": "",
+  "reels_gancho": "",
+  "story_tema": "",
+  "story_1": "",
+  "story_2": "",
+  "story_3_tipo": "",
+  "story_3_instrucao": ""
+}
+
+Os valores de reels_pilar devem ser exatamente um de: "Autoridade Clínica", "Rotina Médica Real", "Comportamento & Saúde Mental"
+Os valores de story_3_tipo devem ser exatamente um de: "Enquete", "Caixinha de Perguntas", "Reação com Emoji", "Quiz", "Contagem Regressiva"`;
+
+let weekOffset  = 0;
+let weekData    = Array(5).fill(null);
+let weekMonday  = null;
+let editingDay  = null;
+let aiTargetDay = null;
+
+// ── UTILS ──
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dow = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dow);
+  const y = t.getUTCFullYear();
+  const jan1 = new Date(Date.UTC(y, 0, 1));
+  return { year: y, week: Math.ceil(((t - jan1) / 86400000 + 1) / 7) };
+}
+function getMonday(d) {
+  const r = new Date(d); r.setHours(0,0,0,0);
+  const dow = r.getDay();
+  r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1));
+  return r;
+}
+function weekKey(mon) {
+  const { year, week } = isoWeek(mon);
+  return `${year}_W${String(week).padStart(2,'0')}`;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function isToday(d) {
+  const t = new Date();
+  return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
+}
+function fmtDate(d) { return `${d.getDate()} de ${MONTHS[d.getMonth()]}`; }
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateLabel(mon) {
+  const fri = addDays(mon, 4);
+  const { week } = isoWeek(mon);
+  document.getElementById('weekNum').textContent = `Semana ${week}`;
+  document.getElementById('weekRange').textContent =
+    mon.getMonth() === fri.getMonth()
+      ? `${mon.getDate()} a ${fri.getDate()} de ${MONTHS[mon.getMonth()]}`
+      : `${mon.getDate()} ${MONTHS_S[mon.getMonth()]} – ${fri.getDate()} ${MONTHS_S[fri.getMonth()]}`;
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── LOGIN ──
+function doLogin() {
+  const val = document.getElementById('pwdInput').value;
+  if (val === PASSWORD) {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadApiKey();
+    loadWeek();
+  } else {
+    document.getElementById('loginErr').textContent = 'Senha incorreta. Tente novamente.';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+
+// ── API KEY ──
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('na_anthropic_key', val);
+  showToast('API Key salva ✓');
+}
+function loadApiKey() {
+  const saved = localStorage.getItem('na_anthropic_key') || '';
+  document.getElementById('apiKeyInput').value = saved;
+}
+
+// ── SUPABASE ──
+async function supaFetch(path, opts = {}) {
+  const res = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      apikey: SUPA_KEY,
+      Authorization: `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(body || res.status);
+  }
+  return res;
+}
+
+async function loadWeek() {
+  const ref = new Date(); ref.setDate(ref.getDate() + weekOffset * 7);
+  weekMonday = getMonday(ref);
+  updateLabel(weekMonday);
+
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = '<div class="load-wrap"><div class="spinner"></div><div>Carregando...</div></div>';
+
+  try {
+    const key = weekKey(weekMonday);
+    const res = await supaFetch(`calendar_content?week_key=eq.${key}&order=day_index`);
+    const rows = await res.json();
+    weekData = Array(5).fill(null);
+    rows.forEach(r => { if (r.day_index >= 0 && r.day_index <= 4) weekData[r.day_index] = r; });
+    renderCards();
+  } catch {
+    area.innerHTML = '<div class="err-msg">Erro ao carregar dados. Verifique a conexão.</div>';
+  }
+}
+
+function renderCards() {
+  const html = weekData.map((row, i) => {
+    const d = addDays(weekMonday, i);
+    const tod = isToday(d);
+    const has = !!row;
+    return `
+      <div class="day-card${tod?' is-today':''}">
+        <div class="card-top">
+          <div class="card-left">
+            <span class="dot ${has?'filled':'empty'}"></span>
+            <span class="day-name-lbl">${DAYS_S[i]}</span>
+          </div>
+          ${tod ? '<span class="today-badge">HOJE</span>' : ''}
+        </div>
+        <div class="card-date">${fmtDate(d)}</div>
+        ${has && row.reels_tema ? `<div class="card-preview">${esc(row.reels_tema)}</div>` : ''}
+        <div class="card-btns">
+          <button class="btn-edit" onclick="openEdit(${i})">Editar</button>
+          <button class="btn-ai" onclick="openAiModal(${i})">✦ Gerar com IA</button>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('cardsArea').innerHTML = `<div class="cards">${html}</div>`;
+}
+
+function changeWeek(dir) { weekOffset += dir; loadWeek(); }
+
+// ── EDIT FORM ──
+function openEdit(dayIndex, prefill) {
+  editingDay = dayIndex;
+  const d = addDays(weekMonday, dayIndex);
+  document.getElementById('editDay').textContent  = DAYS[dayIndex];
+  document.getElementById('editDate').textContent = fmtDate(d);
+
+  const row = prefill || weekData[dayIndex] || {};
+  document.getElementById('f_reels_tema').value   = row.reels_tema || '';
+  document.getElementById('f_reels_pilar').value  = row.reels_pilar || '';
+  document.getElementById('f_reels_dir').value    = row.reels_direcionamento || '';
+  document.getElementById('f_reels_gancho').value = row.reels_gancho || '';
+  document.getElementById('f_story_tema').value   = row.story_tema || '';
+  document.getElementById('f_story1').value       = row.story_1 || '';
+  document.getElementById('f_story2').value       = row.story_2 || '';
+  document.getElementById('f_story3_tipo').value  = row.story_3_tipo || '';
+  document.getElementById('f_story3_inst').value  = row.story_3_instrucao || '';
+
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('editView').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function closeEdit() {
+  document.getElementById('editView').style.display = 'none';
+  document.getElementById('mainView').style.display = 'block';
+  editingDay = null;
+}
+
+async function saveDay() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  const key = weekKey(weekMonday);
+  const payload = {
+    week_key: key,
+    day_index: editingDay,
+    reels_tema: document.getElementById('f_reels_tema').value.trim(),
+    reels_pilar: document.getElementById('f_reels_pilar').value,
+    reels_direcionamento: document.getElementById('f_reels_dir').value.trim(),
+    reels_gancho: document.getElementById('f_reels_gancho').value.trim(),
+    story_tema: document.getElementById('f_story_tema').value.trim(),
+    story_1: document.getElementById('f_story1').value.trim(),
+    story_2: document.getElementById('f_story2').value.trim(),
+    story_3_tipo: document.getElementById('f_story3_tipo').value,
+    story_3_instrucao: document.getElementById('f_story3_inst').value.trim(),
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    await supaFetch('calendar_content', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { Prefer: 'resolution=merge-duplicates' }
+    });
+    showToast('Salvo com sucesso ✓');
+    closeEdit();
+    await loadWeek();
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao salvar. Tente novamente.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salvar dia';
+  }
+}
+
+async function clearDay() {
+  if (!confirm(`Apagar o conteúdo de ${DAYS[editingDay]}?`)) return;
+  const key = weekKey(weekMonday);
+  try {
+    await supaFetch(
+      `calendar_content?week_key=eq.${key}&day_index=eq.${editingDay}`,
+      { method: 'DELETE' }
+    );
+    showToast('Conteúdo removido');
+    closeEdit();
+    await loadWeek();
+  } catch {
+    showToast('Erro ao apagar. Tente novamente.');
+  }
+}
+
+// ── AI MODAL ──
+function openAiModal(dayIndex) {
+  aiTargetDay = dayIndex;
+  document.getElementById('aiDayLbl').textContent = `Dia: ${DAYS[dayIndex]}`;
+  document.getElementById('aiCtx').value = '';
+  setAiLoading(false);
+  document.getElementById('aiModal').classList.add('open');
+}
+
+function closeAiModal() {
+  document.getElementById('aiModal').classList.remove('open');
+}
+
+function setAiLoading(loading) {
+  const btn = document.getElementById('aiGenBtn');
+  const spinner = document.getElementById('aiSpinner');
+  const txt = document.getElementById('aiGenTxt');
+  btn.disabled = loading;
+  spinner.style.display = loading ? 'block' : 'none';
+  txt.textContent = loading ? 'Gerando...' : 'Gerar conteúdo';
+}
+
+function extractJSON(text) {
+  try { return JSON.parse(text.trim()); } catch {}
+  const md = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (md) { try { return JSON.parse(md[1].trim()); } catch {} }
+  const obj = text.match(/\{[\s\S]*\}/);
+  if (obj) { try { return JSON.parse(obj[0]); } catch {} }
+  throw new Error('Resposta inválida da IA');
+}
+
+async function generateAI() {
+  const apiKey = (localStorage.getItem('na_anthropic_key') || '').trim();
+  if (!apiKey) { showToast('⚠ Insira sua Anthropic API Key primeiro'); return; }
+
+  const context = document.getElementById('aiCtx').value.trim();
+  if (!context) { showToast('⚠ Descreva o contexto da semana'); return; }
+
+  const dayName = DAYS[aiTargetDay];
+  const prompt  = AI_PROMPT.replace('{contexto}', context).replace('{dia}', dayName);
+
+  setAiLoading(true);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const generated = extractJSON(data.content[0].text);
+
+    closeAiModal();
+    openEdit(aiTargetDay, {
+      reels_tema: generated.reels_tema,
+      reels_pilar: generated.reels_pilar,
+      reels_direcionamento: generated.reels_direcionamento,
+      reels_gancho: generated.reels_gancho,
+      story_tema: generated.story_tema,
+      story_1: generated.story_1,
+      story_2: generated.story_2,
+      story_3_tipo: generated.story_3_tipo,
+      story_3_instrucao: generated.story_3_instrucao
+    });
+    showToast('✦ Conteúdo gerado! Revise e salve.');
+  } catch (e) {
+    console.error(e);
+    showToast('Erro: ' + (e.message || 'tente novamente'));
+  } finally {
+    setAiLoading(false);
+  }
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('aiModal').classList.contains('open')) closeAiModal();
+    else if (editingDay !== null) closeEdit();
+  }
+});
+
+// Close modal clicking overlay
+document.getElementById('aiModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('aiModal')) closeAiModal();
+});
+</script>
+</body>
+</html>
